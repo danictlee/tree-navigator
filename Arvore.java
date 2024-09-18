@@ -19,23 +19,18 @@ public class Arvore {
 
     private int soma;
     private int maiorSoma;
-    private int numeroOperacoes;
+
     private String direcao;
 
+    private int count;
+
     public Arvore(String caminhoArquivo) throws IOException {
-        this.numeroOperacoes = 0;
         carregarArvore(caminhoArquivo);
     }
 
-    public int getNumeroOperacoes() {
-        return numeroOperacoes;
-    }
-
-    private void incrementarOperacoes() {
-        numeroOperacoes++;
-    }
-
     private void carregarArvore(String caminhoArquivo) throws IOException {
+
+        // Ler arvore
         BufferedReader reader = new BufferedReader(new FileReader(caminhoArquivo));
         String[] dimensoes = reader.readLine().split(" ");
         linhas = Integer.parseInt(dimensoes[0]);
@@ -63,12 +58,16 @@ public class Arvore {
 
         x = posicaoInicialX;
         y = posicaoInicialY;
+
+        rastrearGalho();
     }
 
     public void rastrearGalho() {
-        long startTime = System.nanoTime(); 
+
         char atual = arvore[x][y];
+
         System.out.println("Iniciando a leitura da árvore...");
+
         direcao = "esquerda";
 
         if (atual == '/') {
@@ -80,13 +79,9 @@ public class Arvore {
         }
 
         while (true) {
-            if (x < 0 || x >= linhas || y < 0 || y >= colunas) {
-                break;
-            }
-
             atual = arvore[x][y];
             verifica(atual);
-            incrementarOperacoes();
+            
             if (direcao.equals("esquerda")) {
                 x--;
                 y--;
@@ -96,17 +91,18 @@ public class Arvore {
             } else if (direcao.equals("cima")) {
                 x--;
             }
+            
         }
 
-        long endTime = System.nanoTime(); 
-        long duration = (endTime - startTime) / 1_000_000; 
-        System.out.println("Tempo para encontrar o galho com maior soma: " + duration + " ms");
     }
 
     public void verifica(char atual) {
+        count++;
         if (Character.isDigit(atual)) {
             soma += Character.getNumericValue(atual);
-        } else {
+        }
+
+        else {
             if (atual == 'V') {
                 Ponto ponto = new Ponto(x, y, 'V', soma);
                 pontos.push(ponto);
@@ -116,25 +112,29 @@ public class Arvore {
                 pontos.push(ponto);
                 direcao = "esquerda";
             } else if (atual == '#') {
-                if (soma > maiorSoma) {
+                if (soma > maiorSoma){
                     maiorSoma = soma;
                 }
-                if (pontos.isEmpty()) {
+                if (pontos.isEmpty()){
                     System.out.println("Galho com a maior soma: " + maiorSoma);
-                    return;
+                    System.out.println("Numero de operacoes: " + count);
+                    System.exit(0);
                 }
 
                 Ponto ponto = pontos.pop();
-                if (ponto.getChar() == 'W') {
-                    pontos.push(new Ponto(ponto.getX(), ponto.getY(), 'V', ponto.getSoma()));
+                if(ponto.getChar() == 'W') {
+                    pontos.push(new Ponto(ponto.getX(), ponto.getY(),'V', ponto.getSoma()));
                     direcao = "cima";
-                } else if (ponto.getChar() == 'V') {
+                } else if(ponto.getChar() == 'V') {
                     direcao = "direita";
                 }
                 x = ponto.getX();
                 y = ponto.getY();
                 soma = ponto.getSoma();
             }
+
         }
+
     }
+
 }
